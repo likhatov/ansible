@@ -1,0 +1,55 @@
+---
+- name: Build Project
+  hosts: buildhost
+  become: yes
+
+  tasks:
+  - name: Ensure git is present
+    apt:
+      name: git
+      state: present
+
+  - name: Ensure default-jdk is present
+    apt:
+      name: default-jdk
+      state: present
+
+  - name: Ensure maven is present
+    apt:
+      name: maven
+      state: present
+
+  - name: Clone repository
+    git:
+      repo: https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
+      dest: /home/lpv_mail/boxfuse
+  
+  - name: Build project
+    shell: mvn package
+    args:
+      chdir: /home/lpv_mail/boxfuse/
+
+  - name: Copy the artefact file from buildhost to webbf 
+    tags: sync-push
+    synchronize:
+      src: "/home/lpv_mail/boxfuse/target/hello-1.0.war"
+      dest: "/root"
+      mode: push
+    delegate_to: buildhost
+    register: syncfile
+
+
+- name: BoxFuse Prod
+  hosts: webbf
+  become: yes
+
+  tasks:
+  - name: Ensure tomcat8 is present
+    apt:
+      name: tomcat8
+      state: present
+
+  - name: Copy the artefact file in web server directory
+    command: /bin/cp hello-1.0.war /var/lib/tomcat8/webapps/
+    args:
+      chdir: /root
