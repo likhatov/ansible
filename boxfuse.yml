@@ -49,7 +49,11 @@
       name: tomcat8
       state: present
 
-  - name: Copy the artefact file in web server directory
-    command: /bin/cp hello-1.0.war /var/lib/tomcat8/webapps/
-    args:
-      chdir: /root
+  - name: Copy the artefact file from buildhost to webbf
+    tags: sync-push
+    synchronize:
+      src: "/home/lpv_mail/boxfuse/target/hello-1.0.war"
+      dest: "/var/lib/tomcat8/webapps/"
+      mode: push
+    delegate_to: buildhost
+    register: syncfile
