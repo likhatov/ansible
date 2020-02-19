@@ -29,15 +29,6 @@
     args:
       chdir: /home/lpv_mail/boxfuse/
 
-  - name: Copy the artefact file from buildhost to webbf 
-    tags: sync-push
-    synchronize:
-      src: "/home/lpv_mail/boxfuse/target/hello-1.0.war"
-      dest: "/root"
-      mode: push
-    delegate_to: buildhost
-    register: syncfile
-
 
 - name: BoxFuse Prod
   hosts: webbf
